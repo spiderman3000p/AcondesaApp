@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="acondesa.acondesaapp.Dashboard">
+    <item
+        android:id="@+id/mi_cuenta"
+        android:checkable="false"
+        android:enabled="false"
+        android:orderInCategory="100"
+        android:title="@string/my_account"
+        android:visible="false"
+        app:showAsAction="ifRoom|collapseActionView" />
+    <item
+        android:id="@+id/cerrar_sesion"
+        android:orderInCategory="100"
+        android:title="@string/logout"
+        android:visible="true"
+        app:showAsAction="never|collapseActionView" />
+    <item
+        android:id="@+id/salir"
+        android:orderInCategory="100"
+        android:title="@string/exit"
+        android:visible="true"
+        app:showAsAction="never|collapseActionView" />
+</menu>

@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">AcondesaApp</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">NIT</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Entrar</string>
+    <string name="action_sign_in_short">Entrar</string>
+    <string name="unknown_error">Ups! Algo ha salido mal.</string>
+    <string name="error_invalid_data">Datos invalidos</string>
+    <string name="title_activity_dashboard">Dashboard</string>
+    <string name="error_noconection_message">Necesitas conexion a Internet para usar esta aplicacion</string>
+    <string name="title_error_noconection">No hay conexion</string>
+    <string name="button_error_noconection">OK</string>
+    <string name="my_account">Mi cuenta</string>
+    <string name="logout">Cerrar sesion</string>
+    <string name="exit">Salir</string>
+    <string name="yes">SI</string>
+    <string name="no">NO</string>
+    <string name="exit_message_prompt">Desea salir de la aplicacion?</string>
+    <string name="min_version_kitkat">Necesita version Android 4.4 o superior</string>
+    <string name="app_url">http://acondesa.com.co/proyectoandroid/index.php/</string>
+</resources>
