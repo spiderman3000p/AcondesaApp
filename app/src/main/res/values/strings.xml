@@ -17,7 +17,46 @@
     <string name="exit">Salir</string>
     <string name="yes">SI</string>
     <string name="no">NO</string>
+    <string name="title_1">RETENCIONES</string>
+    <string name="title_2">PAGOS</string>
+    <string name="title_3">NOMINA</string>
+    <string name="important">IMPORTANTE</string>
+    <string name="pdf_created">PDF creado exitosamente</string>
     <string name="exit_message_prompt">Desea salir de la aplicacion?</string>
     <string name="min_version_kitkat">Necesita version Android 4.4 o superior</string>
     <string name="app_url">http://acondesa.com.co/proyectoandroid/index.php/</string>
+    <string name="app_register_url">http://acondesa.com.co/proyectoandroid/index.php/main/registro</string>
+    <string name="denied_storage_permission_message">Usted ha denegado el permiso de escritura. No podra descargar reportes</string>
+    <string name="denied_location_permission_message">Usted ha denegado el permiso de localización. No podrá ubicarnos en el mapa</string>
+    <string name="granted_storage_permission_message">Listo! Ya podrá decargar reportes</string>
+    <string name="granted_location_permission_message">Listo! Ya podrá acceder al mapa de ubicación</string>
+    <string name="pdf_filename">acondesa_report.pdf</string>
+    <string name="downloading">Descargando...</string>
+    <string name="register_button">Registrar</string>
+    <string name="goahead">Adelante!</string>
+    <string name="message_pdf">Para usar las funcionalidades de esta aplicación para generar
+    y descargar reportes pdf, deberá suministrarle permisos de escritura</string>
+    <string name="message_maps">Para usar las funcionalidades de esta aplicación para localización y ubicación,
+        deberá suministrarle permisos de localización</string>
+    <string name="ask_perrmission_storage_rationale">Para poder otorgar permisos de escritura a esta aplicación
+        . Por favor dirijase a configuracion de la aplicacion para activarlos</string>
+    <string name="ask_perrmission_location_rationale">Para poder otorgar permisos de localización a esta aplicación
+        . Por favor diríjase a configuración de la aplicación para activarlos</string>
+    <string name="title_activity_ubication">Nuestra ubicación</string>
+    <string name="title_activity_contact">Contáctanos</string>
+    <string name="register_textview">REGISTRO</string>
+    <string name="ubication_textview">UBICACIÓN</string>
+    <string name="contact_textview">CONTACTO</string>
+    <string name="action_settings">Settings</string>
+    <string name="telephone">+5804248975922</string>
+    <string name="contactsubtitle">Datos</string>
+    <string name="email">pagman6@gmail.com</string>
+    <string name="logo_acondesa">logo acondesa</string>
+    <string name="textviewcoontact">TextView</string>
+    <string name="textviewcontact2">TextView</string>
+    <string name="_telefono">+57 5 3743211</string>
+    <string name="email_contact">acondesa@gmail.com</string>
+    <string name="logo">logo</string>
+    <string name="contactus_url">http://acondesa.com.co/proyectoandroid/application/contactus</string>
+
 </resources>

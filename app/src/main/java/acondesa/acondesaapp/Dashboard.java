@@ -1,40 +1,41 @@
 package acondesa.acondesaapp;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
-
+import android.os.Bundle;
 import android.os.Environment;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintManager;
+import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
-
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
-
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.webkit.CookieManager;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -57,6 +58,9 @@ public class Dashboard extends AppCompatActivity {
     private SharedPreferences sharedpreferences;
     private static final String MyPREFERENCES = "MyPrefs";
     private static Boolean logged_in = false;
+    private static final int VERSION_ANDROID = Build.VERSION.SDK_INT;
+    private static final int PERMISSION_REQUEST_CODE = 1;
+    private static boolean STORAGE_PERMISSION_GRANTED = false;
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -121,6 +125,7 @@ public class Dashboard extends AppCompatActivity {
         password = sharedpreferences.getString("password", "none");
         logged_in = sharedpreferences.getBoolean("logged_in", logged_in);
 
+        comprobarPermisos();
 
         if (password.equals("none") && username.equals("none") && !logged_in) {
             //enviar al login
@@ -133,11 +138,23 @@ public class Dashboard extends AppCompatActivity {
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        /*
+      The {@link android.support.v4.view.PagerAdapter} that will provide
+      fragments for each of the sections. We use a
+      {@link FragmentPagerAdapter} derivative, which will keep every
+      loaded fragment in memory. If this becomes too memory intensive, it
+      may be best to switch to a
+      {@link android.support.v4.app.FragmentStatePagerAdapter}.
+     */
+        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        /*
+      The {@link ViewPager} that will host the section contents.
+     */
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
@@ -145,11 +162,27 @@ public class Dashboard extends AppCompatActivity {
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View view) {
-                WebView webview = (WebView) getCurrentFocus().findViewById(R.id.webview2);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    createWebPrintJob(webview);
+                ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
+
+                View activeView = (View) mViewPager.findViewWithTag("myview"+mViewPager.getCurrentItem());
+                WebView webview = (WebView) activeView.findViewById(R.id.webview2);
+                if (VERSION_ANDROID >= Build.VERSION_CODES.KITKAT) {
+                    //comprobar si la version de android es 6 o superior (para comprobar permisos)
+                    if(VERSION_ANDROID >= Build.VERSION_CODES.M) {
+
+                        if(!checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+                            requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                    getText(R.string.ask_perrmission_storage_rationale).toString());
+                            return;
+                        }
+                    }
+                        createWebPrintJob(webview);
+                        Toast.makeText(Dashboard.this, getText(R.string.pdf_created), Toast.LENGTH_LONG).show();
+
                 } else {
                     Toast.makeText(Dashboard.this, getText(R.string.min_version_kitkat), Toast.LENGTH_LONG).show();
                 }
@@ -157,11 +190,15 @@ public class Dashboard extends AppCompatActivity {
             }
 
         });
+
         FloatingActionButton syncronizarfab = (FloatingActionButton) findViewById(R.id.fabsync);
         syncronizarfab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                WebView webview = (WebView) getCurrentFocus().findViewById(R.id.webview2);
+                ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
+
+                View activeView = (View) mViewPager.findViewWithTag("myview"+mViewPager.getCurrentItem());
+                WebView webview = (WebView) activeView.findViewById(R.id.webview2);
                 webview.reload();
             }
 
@@ -169,6 +206,63 @@ public class Dashboard extends AppCompatActivity {
 
     }
 
+    public boolean checkPermission(String permission) {
+        int result = ContextCompat.checkSelfPermission(Dashboard.this, permission);
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            STORAGE_PERMISSION_GRANTED = true;
+            return true;
+        } else {
+            STORAGE_PERMISSION_GRANTED = false;
+            return false;
+        }
+    }
+
+    public void requestPermission(String permission,String message) {
+
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(Dashboard.this, permission)) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setTitle("Importante");
+            dialog.setMessage(message);
+            dialog.setCancelable(false);
+
+            dialog.setPositiveButton(getText(R.string.yes), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    //ir a la pantalla de configuracion de aplicacion
+                    startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.fromParts("package", getPackageName(), null)));
+                }//do some
+            });
+            dialog.setNegativeButton(getText(R.string.no), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Toast.makeText(Dashboard.this, getText(R.string.denied_storage_permission_message), Toast.LENGTH_LONG).show();
+                }//do some
+            });
+            dialog.show();
+
+        } else {
+            ActivityCompat.requestPermissions(Dashboard.this, new String[]{permission}, PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // si el permiso es concedido
+                    STORAGE_PERMISSION_GRANTED = true;
+                    Toast.makeText(this, getText(R.string.granted_storage_permission_message), Toast.LENGTH_LONG).show();
+                } else {
+                    //sino se concede el permiso
+                    STORAGE_PERMISSION_GRANTED = false;
+                    Toast.makeText(this, getText(R.string.denied_storage_permission_message), Toast.LENGTH_LONG).show();
+                }
+                break;
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -240,7 +334,8 @@ public class Dashboard extends AppCompatActivity {
 
 
             loadWeb(rootView);
-
+            int position = getArguments().getInt(ARG_SECTION_NUMBER);
+            rootView.setTag("myview"+position);
 
             return rootView;
         }
@@ -253,7 +348,7 @@ public class Dashboard extends AppCompatActivity {
 
             webview2 = rootView.findViewById(R.id.webview2);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (VERSION_ANDROID >= Build.VERSION_CODES.KITKAT) {
                 // chromium, enable hardware acceleration
                 webview2.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             } else {
@@ -283,21 +378,21 @@ public class Dashboard extends AppCompatActivity {
                     url_action = "pagos";
                     break;
                 case 2:
-                    url_action = "registro";
+                    url_action = "nomina";
                     break;
                 default:
                     break;
             }
 
-            if (!username.equals("none") && !password.equals("none")) {
+            if (!username.equals("none") && !password.equals("none") && position < 2) {
                 urlToLoad = app_url + "main/login/" + username + "/" + password + "/" + url_action;
-
+            }else{
+                urlToLoad = app_url + "main/" + url_action;
             }
 
             webview2.loadUrl(urlToLoad);
             CookieManager cookieManager = CookieManager.getInstance();
             cookieManager.setAcceptCookie(true);
-
 
             webview2.setWebViewClient(new WebViewClient() {
 
@@ -306,25 +401,9 @@ public class Dashboard extends AppCompatActivity {
                     super.onPageStarted(webview, url, favicon);
                     bar.setVisibility(View.VISIBLE);
                     webview2.setVisibility(View.GONE);
-
-                    if (url.contains("PDF") || url.contains("pdf")) {
-                        Toast.makeText(getContext(), "Descargando...", Toast.LENGTH_SHORT).show();
-                        //startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                        request.allowScanningByMediaScanner();
-
-                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "acondesa_download_file.pdf");
-                        //request.setVisibleInDownloadsUi(true);
-                        //request.setRequiresCharging(true);
-
-
-                        DownloadManager dm = (DownloadManager) getContext().getSystemService(DOWNLOAD_SERVICE);
-
-                        dm.enqueue(request);
-
-                    }
                 }
+
+
 
                 @Override
                 public void onPageFinished(WebView view, String url) {
@@ -339,18 +418,46 @@ public class Dashboard extends AppCompatActivity {
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
 
-                    if (Uri.parse(url).getHost().contains("acondesa.com.co")) {
+                    if (Uri.parse(url).getHost().equals("acondesa.com.co")) {
                         // This is my web site, so do not override; let my WebView load the page
                         // Toast.makeText(getContext(), "Sigo dentro de acondesa", Toast.LENGTH_LONG).show();
+                        if (url.contains("PDF") || url.contains("pdf")) {
 
+                            //comprobar si hay permisos de escritura
+
+                            if(VERSION_ANDROID >= 23){
+                                Dashboard d = (Dashboard) getActivity();
+                                if(!d.checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+                                {
+                                    d.requestPermission(Manifest.permission.READ_EXTERNAL_STORAGE,
+                                            getText(R.string.ask_perrmission_storage_rationale).toString());
+                                            return true;
+                                }
+                            }
+                            bar.setVisibility(View.VISIBLE);
+                            webview2.setVisibility(View.GONE);
+
+                            Toast.makeText(getContext(), "Descargando...", Toast.LENGTH_SHORT).show();
+                            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                            request.allowScanningByMediaScanner();
+
+                            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "acondesa_download_file.pdf");
+                            //request.setVisibleInDownloadsUi(true);
+                            //request.setRequiresCharging(true);
+                            DownloadManager dm = (DownloadManager) getContext().getSystemService(DOWNLOAD_SERVICE);
+
+                            dm.enqueue(request);
+
+                        }
                         return false;//aqui debe ser false,
                     }
                     // Otherwise, the link is not for a page on my site, so launch another Activity that handles URLs
-
+                    /*
                     Toast.makeText(getContext(), "saliendo de acondesaApp url:" + url, Toast.LENGTH_SHORT).show();
 
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-
+                    */
                     return true;
                 }
 
@@ -373,20 +480,6 @@ public class Dashboard extends AppCompatActivity {
     }
 
 
-    public static class WebAppInterface {
-        Context mContext;
-        View view;
-
-        /**
-         * Instantiate the interface and set the context
-         */
-        WebAppInterface(Context c, View v) {
-            mContext = c;
-            view = v;
-        }
-
-    }
-
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -402,8 +495,10 @@ public class Dashboard extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
+
             return PlaceholderFragment.newInstance(position);
         }
+
 
         @Override
         public int getCount() {
@@ -415,11 +510,11 @@ public class Dashboard extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "RETENCIONES";
+                    return getString(R.string.title_1);
                 case 1:
-                    return "PAGOS";
+                    return getString(R.string.title_2);
                 case 2:
-                    return "REGISTRO";
+                    return getString(R.string.title_3);
             }
             return null;
         }
@@ -442,20 +537,51 @@ public class Dashboard extends AppCompatActivity {
     }
 
 
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     private void createWebPrintJob(WebView webView) {
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT)
-            return;
+        if (VERSION_ANDROID >= Build.VERSION_CODES.KITKAT) {
 
-        // Get a PrintManager instance
-        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
-        // Create a print job with name and adapter instance
-        String jobName = getString(R.string.app_name) + " Screen Capture";
-        // Get a print adapter instance
-        PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter();
 
-        printManager.print(jobName, printAdapter,
-                new PrintAttributes.Builder().build());
+            // Get a PrintManager instance
+            PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+            // Create a print job with name and adapter instance
+            String jobName = getString(R.string.app_name) + " Screen Capture.pdf";
+            // Get a print adapter instance
+            PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter();
+
+            printManager.print(jobName, printAdapter,
+                    new PrintAttributes.Builder().build());
+        }
+
+    }
+
+    private void comprobarPermisos() {
+
+        //comprobar si la version de android es 6 o superior (para comprobar permisos)
+        if(VERSION_ANDROID >= Build.VERSION_CODES.M) {
+
+            if(!checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+                //mostrar dialogo con Dibujo ilustrativo sobrfe el permiso requerido
+                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                dialog.setTitle(getString(R.string.important));
+                dialog.setCancelable(false);
+
+                dialog.setMessage(getString(R.string.message_pdf));
+                dialog.setPositiveButton(getString(R.string.goahead),new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialoginterface, int i){
+                        requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                getText(R.string.ask_perrmission_storage_rationale).toString());
+                    }
+
+                });
+                dialog.show();
+                return;
+            }
+        }
 
     }
 

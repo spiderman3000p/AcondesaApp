@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import android.widget.TextView;
 import android.widget.Toast;
 
 import android.net.Uri;
@@ -40,9 +41,13 @@ public class LoginActivity extends AppCompatActivity {
     private boolean logged_in = false;
     private ProgressBar login_progress;
     private Button login_button;
+
     private static String username_st;
     private static String password_st;
-    private SharedPreferences sharedpreferences;
+    private static TextView register_link;
+    private static TextView ubication_link;
+    private static TextView contact_link;
+
     private static final String MyPREFERENCES = "MyPrefs";
     // CONNECTION_TIMEOUT and READ_TIMEOUT are in milliseconds
 
@@ -83,9 +88,41 @@ public class LoginActivity extends AppCompatActivity {
             login_progress = (ProgressBar) findViewById(R.id.login_progress);
             login_button = (Button) findViewById(R.id.email_sign_in_button);
 
-
+            register_link = (TextView) findViewById(R.id.textview_register);
+            ubication_link = (TextView) findViewById(R.id.textview_ubication);
+            contact_link = (TextView) findViewById(R.id.textview_contact);
+            textViewLinks();
             LoginButton();
         }
+    }
+
+    private void textViewLinks(){
+        register_link.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        registerActivity();
+                    }
+                }
+        );
+
+        ubication_link.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ubicationActivity();
+                    }
+                }
+        );
+
+        contact_link.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        contactActivity();
+                    }
+                }
+        );
     }
 
     private void LoginButton() {
@@ -98,6 +135,27 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+
+    private  void registerActivity(){
+        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+
+        startActivity(intent);
+    }
+
+    private  void ubicationActivity(){
+        Intent intent = new Intent(LoginActivity.this, UbicationActivity.class);
+
+        startActivity(intent);
+
+    }
+
+    private  void contactActivity(){
+        Intent intent = new Intent(LoginActivity.this, ContactActivity.class);
+
+        startActivity(intent);
+
     }
 
     private void checkLogin() {
@@ -218,13 +276,13 @@ public class LoginActivity extends AppCompatActivity {
                  */
                 //para debug
                 Context context = LoginActivity.this;
-                sharedpreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+                SharedPreferences sharedpreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedpreferences.edit();
 
                 editor.putString("username", username.getText().toString());
                 editor.putString("password", password.getText().toString());
 
-                editor.commit();
+                editor.apply();
                 logged_in = true;
 
                 Intent intent = new Intent(LoginActivity.this, Dashboard.class);

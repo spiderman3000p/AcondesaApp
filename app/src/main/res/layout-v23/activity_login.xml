@@ -94,6 +94,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
+                    android:contextClickable="false"
                     android:linksClickable="true"
                     android:text="@string/ubication_textview"
                     android:textAppearance="@style/TextAppearance.AppCompat.Button"
