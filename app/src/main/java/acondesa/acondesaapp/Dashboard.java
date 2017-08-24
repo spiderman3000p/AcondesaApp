@@ -56,11 +56,11 @@ public class Dashboard extends AppCompatActivity {
     private static String username;
     private static String password;
     private SharedPreferences sharedpreferences;
-    private static final String MyPREFERENCES = "MyPrefs";
-    private static Boolean logged_in = false;
-    private static final int VERSION_ANDROID = Build.VERSION.SDK_INT;
-    private static final int PERMISSION_REQUEST_CODE = 1;
-    private static boolean STORAGE_PERMISSION_GRANTED = false;
+    private static final String MyPREFERENCES = "MyPrefs"; // preferencias para el manejo de sesion nativa
+    private static Boolean logged_in = false; // flag para la sesion
+    private static final int VERSION_ANDROID = Build.VERSION.SDK_INT; //version de android del dispositivo
+    private static final int PERMISSION_REQUEST_CODE = 1; //codigo del permiso ded escritura
+    private static boolean STORAGE_PERMISSION_GRANTED = false;// flag para el permiso de escritura
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -70,6 +70,8 @@ public class Dashboard extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         getIntent().getExtras();
+        //al resumir la aplicacion, obtener los datos de login guardados en sharedpreferences,
+        // para mantener la ultima sesion y asi el ultimo estado de la app
         Context context = Dashboard.this;
         sharedpreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         username = sharedpreferences.getString("username", "none");
@@ -87,6 +89,7 @@ public class Dashboard extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        //al detenerse la app, guardar los datos de login en sharedpreferences
         Context context = Dashboard.this;
         sharedpreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
@@ -97,7 +100,7 @@ public class Dashboard extends AppCompatActivity {
 
         editor.commit();
     }
-
+    //funcion invocada al restaurar el estado de la app, luego de haber sido detenida o pausada
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -105,8 +108,7 @@ public class Dashboard extends AppCompatActivity {
         password = savedInstanceState.getString("password");
         logged_in = savedInstanceState.getBoolean("logged_in");
     }
-
-
+    // funcion invocada al guardar el estado actual de la app antes de ser pausada o detenida
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -152,7 +154,7 @@ public class Dashboard extends AppCompatActivity {
         /*
       The {@link ViewPager} that will host the section contents.
      */
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
 

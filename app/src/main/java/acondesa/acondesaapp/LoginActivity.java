@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -83,6 +84,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
 
             setContentView(R.layout.activity_login);
+
             username = (EditText) findViewById(R.id.email);
             password = (EditText) findViewById(R.id.password);
             login_progress = (ProgressBar) findViewById(R.id.login_progress);

@@ -21,9 +21,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class UbicationActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap;
-    private static final int PERMISSION_REQUEST_CODE = 1;
-    private static boolean LOCATION_PERMISSION_GRANTED = false;
+    private GoogleMap mMap;//objeto google map que usaremos para mostrar la ubicacion
+    private static final int PERMISSION_REQUEST_CODE = 1; // constante usada para identificar el tipo de permiso que solicitamos
+    private static boolean LOCATION_PERMISSION_GRANTED = false; //flag que indica si la aplicacion tiene o no tiene permisos para acceder a la geolocalizacion
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,24 +48,24 @@ public class UbicationActivity extends FragmentActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(10.9275116, -74.7766533);
+        // Creamos un punto con una coordenada
+        LatLng point = new LatLng(10.9275116, -74.7766533);
+        //creamos un marcador y lo personalizamos
         MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(sydney).snippet("Cr 30 28 A-180 Hipódromo (Soledad), Atlántico");
-        markerOptions.position(sydney).title("ACONDESA");
+        markerOptions.position(point).snippet("Cr 30 28 A-180 Hipódromo (Soledad), Atlántico");
+        markerOptions.position(point).title("ACONDESA");
+        //añadimos el marcador al mapa
         mMap.addMarker(markerOptions);
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 15));
+        //movemos la camara del mapa al punto creado anteriormente con un zoom de 15, si se desea mas zoom, aumentar el 15
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(point, 15));
+        //comprabamos si la aplicacion tiene permisos para acceder a la geolocalizacion del usuario
+        //si no los tiene, los solicitamos
         if (!checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            // Esta accion es solo para mostrar la localizacion del usuario en el mismo mapa, es decir, no es indispensable para que
+            // la aplicacion funcione
+            //solicitamos permisos al usuario
             requestPermission(Manifest.permission.ACCESS_FINE_LOCATION,getString(R.string.ask_perrmission_location_rationale));
-           // ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_CODE);
+           //si se concedieron los permisos, se activa la localizacion del usuario en el mapa
             if(LOCATION_PERMISSION_GRANTED)
                 mMap.setMyLocationEnabled(true);
         }else {
@@ -74,8 +74,8 @@ public class UbicationActivity extends FragmentActivity implements OnMapReadyCal
     }
 
     public void requestPermission(String permission,String message) {
-
-
+//funcion que recibe un tipo de permiso y verifica de que manera se solicitara el permiso
+//Si el permiso no puede pedirse por prompt o en el contexto, entonces se le pedira al usuario que los conceda manualmente
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
             dialog.setTitle("Importante");
@@ -105,6 +105,11 @@ public class UbicationActivity extends FragmentActivity implements OnMapReadyCal
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        // Metodo que recibe la respuesta de la peticion de permisos al usuario
+        // aqui recibimos la respuesta y decidimos que hacer segun sea el caso
+        // como la solicitud del permiso le asignamos el codigo PERMISSION_REQUEST_CODE, a la respuesta de ese codigo
+        // es a la que deseamos acceder, por tanto, verificamos si el codigo de respuesta es igual al codigo que le asignamos
+        // a nuestra peticion de permisos al usuario. Si lo es, verificamos si la respuesta fue afirmativa o negativa
         switch (requestCode) {
             case PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -112,14 +117,14 @@ public class UbicationActivity extends FragmentActivity implements OnMapReadyCal
                     LOCATION_PERMISSION_GRANTED = true;
                     Toast.makeText(this, getText(R.string.granted_location_permission_message), Toast.LENGTH_LONG).show();
                 } else {
-                    //sino se concede el permiso
+                    //si no se concede el permiso
                     LOCATION_PERMISSION_GRANTED = false;
                     Toast.makeText(this, getText(R.string.denied_location_permission_message), Toast.LENGTH_LONG).show();
                 }
                 break;
         }
     }
-
+    // funcion que verifica si la aplicacion tiene algun permiso (lo recibe por parametro)
     public boolean checkPermission(String permission) {
         int result = ContextCompat.checkSelfPermission(this, permission);
         if (result == PackageManager.PERMISSION_GRANTED) {

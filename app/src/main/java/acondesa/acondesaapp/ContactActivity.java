@@ -74,18 +74,4 @@ public class ContactActivity extends AppCompatActivity {
 
         });
     }
-
-    private boolean isAppInstalled(String targetPackage){
-        Context c = getApplicationContext();
-        PackageManager pm = c.getPackageManager();
-        try {
-            PackageInfo info = pm.getPackageInfo(targetPackage,
-                    PackageManager.GET_META_DATA);
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
-        return true;
-    }
-
-
 }
